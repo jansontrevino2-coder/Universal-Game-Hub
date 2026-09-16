@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>Universal Game-Hub</title>
+<title>Universal EDU</title>
 
 <link rel="icon" type="image/png" href="Favicon.png">
 
@@ -239,16 +239,32 @@ header {
 </div>
 
 <script>
-/* GITLAB ONLY — NO LOCAL GAMES */
+/* GITLAB UNLIMITED GAME LOADING */
 const projectId = 86390728;
 const ref = "main";
 
-async function fetchGames() {
-    const apiURL =
-        `https://gitlab.com/api/v4/projects/${projectId}/repository/tree?path=Games&ref=${ref}`;
+async function fetchAllGitLab(path) {
+    let page = 1;
+    let results = [];
 
-    const response = await fetch(apiURL);
-    const items = await response.json();
+    while (true) {
+        const url =
+            `https://gitlab.com/api/v4/projects/${projectId}/repository/tree?path=${path}&ref=${ref}&per_page=100&page=${page}`;
+
+        const res = await fetch(url);
+        const data = await res.json();
+
+        if (!Array.isArray(data) || data.length === 0) break;
+
+        results = results.concat(data);
+        page++;
+    }
+
+    return results;
+}
+
+async function fetchGames() {
+    const items = await fetchAllGitLab("Games");
 
     const container = document.getElementById("games");
     container.innerHTML = "";
@@ -257,11 +273,7 @@ async function fetchGames() {
         if (item.type === "tree") {
             const gameName = item.name;
 
-            const folderURL =
-                `https://gitlab.com/api/v4/projects/${projectId}/repository/tree?path=Games/${encodeURIComponent(gameName)}&ref=${ref}`;
-
-            const folderRes = await fetch(folderURL);
-            const folderFiles = await folderRes.json();
+            const folderFiles = await fetchAllGitLab(`Games/${encodeURIComponent(gameName)}`);
 
             const htmlFile = folderFiles.find(f => f.name.toLowerCase().endsWith(".html"));
             if (!htmlFile) continue;
@@ -426,7 +438,7 @@ if (!localStorage.userID) {
 }
 
 const userID = localStorage.userID;
-const channel = new BroadcastChannel("gamehub_presence");
+const channel = new BroadcastChannel("edu_presence");
 let isLeader = false;
 
 channel.onmessage = (msg) => {
