@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Universal Game-Hub</title>
+
+<link rel="icon" type="image/png" href="Favicon.png">
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Comic+Relief&display=swap');
+
+:root {
+    --purple-main: #b06bff;
+    --purple-soft: rgba(176, 107, 255, 0.15);
+}
+
+body {
+    background: #000;
+    color: #e6e6e6;
+    font-family: 'Comic Relief', Arial, sans-serif;
+    margin: 0;
+}
+
+header {
+    padding: 25px;
+    text-align: center;
+    background: #0a0013;
+    font-size: 36px;
+    font-weight: bold;
+    color: var(--purple-main);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+}
+
+#settingsBtn {
+    background:#b06bff;
+    color:white;
+    border:none;
+    padding:8px 14px;
+    border-radius:8px;
+    font-size:16px;
+    cursor:pointer;
+    font-weight:bold;
+}
+
+#games {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 25px;
+    padding: 25px;
+}
+
+.game {
+    background: var(--purple-soft);
+    padding: 15px;
+    border-radius: 14px;
+    text-align: center;
+    cursor: pointer;
+    transition: 0.25s;
+    backdrop-filter: blur(6px);
+    box-shadow: 0 0 20px rgba(0,0,0,0.4);
+    opacity: 0;
+    animation: fadeIn 0.4s forwards;
+}
+
+.game:hover {
+    background: rgba(176, 107, 255, 0.25);
+    transform: translateY(-6px) scale(1.03);
+    box-shadow: 0 0 25px rgba(0,0,0,0.6);
+}
+
+.game img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.game-title {
+    margin-top: 12px;
+    font-size: 20px;
+    font-weight: bold;
+    color: var(--purple-main);
+}
+
+#viewer {
+    display: none;
+    width: 100%;
+    height: 100vh;
+    flex-direction: column;
+}
+
+#viewer iframe {
+    width: 100%;
+    height: calc(100vh - 60px);
+    border: none;
+}
+
+#viewerBar {
+    background: #4a007d;
+    color: white;
+    padding: 12px 20px;
+    font-size: 22px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#viewerBar button {
+    background: #b06bff;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    margin-left: 10px;
+    border-radius: 8px;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#viewerBar button:hover {
+    background: #d9b3ff;
+    color: #4a007d;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* SETTINGS PANEL */
+#settingsPanel {
+    display:none;
+    position:fixed;
+    top:50%;
+    left:50%;
+    transform:translate(-50%, -50%);
+    background:#0a0013;
+    padding:25px;
+    border-radius:14px;
+    box-shadow:0 0 25px rgba(0,0,0,0.6);
+    width:350px;
+    color:white;
+    font-family:'Comic Relief';
+    z-index:9999;
+}
+
+/* LIVE USER COUNTER */
+#onlineCount {
+    position: fixed;
+    bottom: 12px;
+    right: 12px;
+    background: #0a0013;
+    color: white;
+    padding: 10px 14px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: 'Comic Relief';
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
+}
+</style>
+</head>
+<body>
+
+<header>
+    Universal Game-Hub
+    <button id="settingsBtn">Settings</button>
+</header>
+
+<div id="games"></div>
+
+<div id="viewer">
+    <div id="viewerBar">
+        <div id="viewerTitle"></div>
+        <div>
+            <button onclick="document.getElementById('viewerFrame').requestFullscreen()">Fullscreen</button>
+            <button id="openNewTabBtn">Open in New Tab</button>
+            <button onclick="closeViewer()">Close</button>
+        </div>
+    </div>
+    <iframe id="viewerFrame"></iframe>
+</div>
+
+<!-- LIVE USER COUNTER -->
+<div id="onlineCount">Online: ...</div>
+
+<script>
+async function updateOnlineCount() {
+    try {
+        const res = await fetch('/api/online');
+        const data = await res.json();
+        document.getElementById('onlineCount').textContent = `Online: ${data.count}`;
+    } catch {
+        document.getElementById('onlineCount').textContent = 'Online: N/A';
+    }
+}
+
+setInterval(updateOnlineCount, 5000);
+updateOnlineCount();
+</script>
+
+</body>
+</html>
