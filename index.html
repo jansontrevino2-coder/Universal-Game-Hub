@@ -249,7 +249,7 @@ async function fetchAllGitLab(path) {
 
     while (true) {
         const url =
-            `https://gitlab.com/api/v4/projects/${projectId}/repository/tree?path=${path}&ref=${ref}&per_page=100&page=${page}`;
+            `https://gitlab.com/api/v4/projects/${projectId}/repository/tree?path=${path}&ref=${ref}&recursive=true&per_page=100&page=${page}`;
 
         const res = await fetch(url);
         const data = await res.json();
