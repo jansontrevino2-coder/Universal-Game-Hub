@@ -420,14 +420,38 @@ document.getElementById("applySettingsBtn").onclick = () => {
     document.getElementById("settingsPanel").style.display = "none";
 };
 
-/* LIVE USER COUNTER */
+/* SINGLE-TAB ONLINE COUNTER */
+if (!localStorage.userID) {
+    localStorage.userID = crypto.randomUUID();
+}
+
+const userID = localStorage.userID;
+const channel = new BroadcastChannel("gamehub_presence");
+let isLeader = false;
+
+channel.onmessage = (msg) => {
+    if (msg.data === "leader") {
+        isLeader = false;
+    }
+};
+
+channel.postMessage("leader");
+
+setTimeout(() => {
+    if (!isLeader) {
+        isLeader = true;
+    }
+}, 200);
+
 async function updateOnlineCount() {
+    if (!isLeader) return;
+
     try {
-        const res = await fetch('/api/online');
+        const res = await fetch(`/api/online?id=${userID}`);
         const data = await res.json();
-        document.getElementById('onlineCount').textContent = `Online: ${data.count}`;
+        document.getElementById("onlineCount").textContent = `Online: ${data.count}`;
     } catch {
-        document.getElementById('onlineCount').textContent = 'Online: N/A';
+        document.getElementById("onlineCount").textContent = "Online: N/A";
     }
 }
 
